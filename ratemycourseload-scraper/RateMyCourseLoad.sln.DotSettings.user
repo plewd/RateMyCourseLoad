@@ -1,0 +1,16 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=24feaa2c_002D07ca_002D4200_002D8abd_002D6ac1dd14b48f/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Session" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;NUnit3x::2FCEE642-EEE9-4401-ADBD-E8715403A558::net8.0::CourseScraper.Test&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=73bbc09a_002D0ae7_002D454a_002D8328_002Ddedb0d3687bc/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="testParseTitleWithExtraPeriod" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;NUnit3x::2FCEE642-EEE9-4401-ADBD-E8715403A558::net8.0::CourseScraper.Test.testParseTitleWithExtraPeriod&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=9782f09f_002Dcc5a_002D449c_002D8ab2_002Deb47c5d84a7f/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="testParseTitleWithExtraPeriod #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;NUnit3x::2FCEE642-EEE9-4401-ADBD-E8715403A558::net8.0::CourseScraper.Test&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

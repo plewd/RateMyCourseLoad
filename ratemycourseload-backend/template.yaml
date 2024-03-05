@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  SAM Template for ratemycourseload
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 100
+
+    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    LoggingConfig:
+      LogFormat: JSON
+Resources:
+  NetCodeWebAPIServerless:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      Description: AWS Lambda running an HTTP server for ratemycourseload
+      CodeUri: ./src/ServerlessAPI/
+      Handler: ServerlessAPI
+      Runtime: dotnet8
+      MemorySize: 1024
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          SAMPLE_TABLE: !Ref CourseTable
+      Policies:
+        # Give Create/Read/Update/Delete Permissions to the SampleTable
+      - DynamoDBCrudPolicy:
+          TableName: !Ref CourseTable
+      Events:
+        ProxyResource:
+          Type: HttpApi
+          Properties:
+            PayloadFormatVersion: '2.0'
+            Path: /{proxy+}
+            Method: ANY
+        RootResource:
+          PayloadFormatVersion: '2.0'
+          Type: HttpApi
+          Properties:
+            Path: /
+            Method: ANY
+
+  # DynamoDB table to store item: {id: &lt;ID&gt;, name: &lt;NAME&gt;}
+  CourseTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ratemycourseloadCourseCatalog
+      AttributeDefinitions:
+        - AttributeName: Prefix
+          AttributeType: S
+        - AttributeName: Number
+          AttributeType: N
+      KeySchema:
+        - AttributeName: Prefix
+          KeyType: HASH
+        - AttributeName: Number
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+
+Outputs:
+  WebEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"

@@ -1,24 +1,28 @@
-import "./App.css";
-import CourseSelectorList from "./components/CourseSelectorList/CourseSelectorList.tsx";
-import Course from "./types.ts";
+import './App.css'
+import SelectionPage from '@routes/SelectionPage/SelectionPage.tsx'
+import { Course } from '@types'
+import courseList from '@assets/courses.json'
 
-const getAllCourseOptions = () => [
-  { Name: "CS2500", CreditHours: 4 },
-  { Name: "CS3650", CreditHours: 4 },
-  { Name: "PHIL1260", CreditHours: 4 },
-  { Name: "CS2510", CreditHours: 1 },
-  { Name: "BIO111", CreditHours: 4 },
-];
-
-function App() {
-  // fetch all valid courses
-  const courseOptions: Course[] = getAllCourseOptions();
-  return (
-    <>
-      <h1>RateMyCourseLoad</h1>
-      <CourseSelectorList courseOptions={courseOptions} />
-    </>
-  );
+const getAllCourseOptions = (): Course[] => {
+    return courseList
+        .filter((item) => 'exact' in item['credit_hour'])
+        .map((item) => ({
+            Name: item.name,
+            Title: item.title,
+            CreditHours: item['credit_hour'].exact!,
+        }))
 }
 
-export default App;
+function App() {
+    // fetch all valid courses
+    const courseOptions: Course[] = getAllCourseOptions()
+
+    return (
+        <>
+            <h1>RateMyCourseLoad</h1>
+            <SelectionPage courseOptions={courseOptions} />
+        </>
+    )
+}
+
+export default App

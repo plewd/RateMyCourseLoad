@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Domain.fs" />
+        <Compile Include="Utility.fs" />
+        <Compile Include="CourseListParser.fs" />
+        <Compile Include="Scraper.fs" />
+        <Compile Include="Program.fs" />
+        <Content Include="TypeSamples\site-map.xml" />
+        <Content Include="TypeSamples\sample.xml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FSharp.Data" Version="6.3.0" />
+      <PackageReference Include="FSharp.Json" Version="0.4.1" />
+      <PackageReference Include="FsToolkit.ErrorHandling" Version="4.15.1" />
+    </ItemGroup>
+
+</Project>
