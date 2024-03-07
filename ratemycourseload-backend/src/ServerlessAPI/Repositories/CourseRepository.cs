@@ -88,22 +88,6 @@ public class CourseRepository(IDynamoDBContext context, ILogger<CourseRepository
 
         try
         {
-            // var queryConfig = new QueryOperationConfig()
-            // {
-            //     KeyExpression = new Expression()
-            //     {
-            //         ExpressionStatement = "#p = :v_prefix",
-            //         ExpressionAttributeNames = new Dictionary<string, string>
-            //         {
-            //             { "#p", "Prefix" }
-            //         },
-            //         ExpressionAttributeValues = new Dictionary<string, DynamoDBEntry>
-            //         {
-            //             { ":v_prefix", new Primitive { Value = coursePrefix } }
-            //         }
-            //     }
-            // };
-        
             var queryResult = context.QueryAsync<Course>(coursePrefix.ToUpper());
 
             do
