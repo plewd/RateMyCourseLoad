@@ -1,7 +1,5 @@
 module CourseScraper.Domain
 
-open FSharp.Json
-
 [<RequireQualifiedAccess>]
 type ParseError =
     | FindElement of string
@@ -31,8 +29,5 @@ type Course =
 type ParsedCourseList =
     { CoursePrefix: string
       Courses: Course list }
-// do! Json.write "course_prefix" v.CoursePrefix
-// do! Json.write "courses" v.Courses
-
 
 type ParserResult = Result<ParsedCourseList list, ParseError>

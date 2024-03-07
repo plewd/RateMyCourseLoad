@@ -50,15 +50,13 @@ Resources:
         - AttributeName: Prefix
           AttributeType: S
         - AttributeName: Number
-          AttributeType: N
+          AttributeType: S
       KeySchema:
         - AttributeName: Prefix
           KeyType: HASH
         - AttributeName: Number
           KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
+      BillingMode: PAY_PER_REQUEST
 
 Outputs:
   WebEndpoint:

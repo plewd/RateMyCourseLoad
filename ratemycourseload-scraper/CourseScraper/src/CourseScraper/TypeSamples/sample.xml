@@ -1,9 +1,18 @@
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url>
-    <loc>
-        https://mysite.com/course-descriptions/xyyz/
-    </loc>
-    <lastmod>2023-08-03</lastmod>
-    <priority>0.6</priority>
-</url>
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="">
+	<url>
+		<loc>https://course.university.edu/</loc>
+		<lastmod>2024-02-20</lastmod>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://course.university.edu/course-descriptions/woohoo/</loc>
+		<lastmod>2023-08-03</lastmod>
+		<priority>0.6</priority>
+	</url>
+	<url>
+		<loc>https://course.university.edu/course-descriptions/foobar/</loc>
+		<lastmod>2023-08-03</lastmod>
+		<priority>0.6</priority>
+	</url>
 </urlset>

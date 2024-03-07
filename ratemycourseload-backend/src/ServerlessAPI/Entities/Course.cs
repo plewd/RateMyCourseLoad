@@ -17,7 +17,7 @@ public class Course
     public string Prefix { get; set; }
     
     [DynamoDBRangeKey]
-    public int Number { get; set; }
+    public string Number { get; set; }
 
     [DynamoDBProperty]
     public string Title { get; set; } = string.Empty;

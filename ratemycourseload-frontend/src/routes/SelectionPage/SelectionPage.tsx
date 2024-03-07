@@ -5,12 +5,12 @@ import { Stack, Chip, Button, Divider, LinearProgress } from '@mui/joy'
 import SelectedCourseList from '@components/SelectedCourseList.tsx'
 
 interface Props {
-    courseOptions: Course[]
+    coursePrefixOptions: string[]
 }
 
 const maxNumberCourses = 6
 
-export default function SelectionPage({ courseOptions }: Props) {
+export default function SelectionPage({ coursePrefixOptions }: Props) {
     const [selectedCourses, setSelectCourses] = useState<Course[]>([])
     const isAtMaxCourses = selectedCourses.length >= maxNumberCourses
     const [responseLoading, setResponseLoading] = useState<boolean>(false)
@@ -40,13 +40,7 @@ export default function SelectionPage({ courseOptions }: Props) {
                 )}
                 {!responseLoading && (
                     <CourseSelectorInput
-                        courseOptions={courseOptions.filter(
-                            (course) =>
-                                !selectedCourses.some(
-                                    (selectedCourse) =>
-                                        selectedCourse.Name === course.Name
-                                )
-                        )}
+                        coursePrefixOptions={coursePrefixOptions}
                         disabled={isAtMaxCourses}
                         onSelected={(course) => {
                             setSelectCourses([...selectedCourses, course])

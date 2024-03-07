@@ -6,12 +6,11 @@ open FsToolkit.ErrorHandling
 
 open CourseScraper.Domain
 
-type SiteMap = XmlProvider<"./TypeSamples/site-map.xml">
+type SiteMap = XmlProvider<"https://catalog.northeastern.edu/sitemap.xml">
 
 type Scraper(siteMapUrl: string) =
-    let siteMap = SiteMap.Load siteMapUrl
 
-    let relevantPages =
+    let relevantPages (siteMap: SiteMap.Urlset) =
         siteMap.Urls
         |> List.ofArray
         |> List.map (_.Loc >> Uri)
@@ -24,7 +23,8 @@ type Scraper(siteMapUrl: string) =
             | _ -> None)
 
     member x.FetchAll() =
-        relevantPages
+        SiteMap.Load siteMapUrl
+        |> relevantPages
         |> List.map (fun page ->
             let result =
                 page.Uri.ToString()

@@ -6,16 +6,21 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Domain.fs" />
         <Compile Include="Utility.fs" />
+        <Compile Include="Domain.fs" />
         <Compile Include="CourseListParser.fs" />
         <Compile Include="Scraper.fs" />
+        <Compile Include="DynamodbClient.fs" />
+        <Compile Include="CommandLine.fs" />
         <Compile Include="Program.fs" />
         <Content Include="TypeSamples\site-map.xml" />
         <Content Include="TypeSamples\sample.xml" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Argu" Version="6.2.2" />
+      <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.301.17" />
+      <PackageReference Include="AWSSDK.SecurityToken" Version="3.7.300.55" />
       <PackageReference Include="FSharp.Data" Version="6.3.0" />
       <PackageReference Include="FSharp.Json" Version="0.4.1" />
       <PackageReference Include="FsToolkit.ErrorHandling" Version="4.15.1" />
