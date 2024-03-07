@@ -2,7 +2,10 @@ using System.Text.Json;
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Microsoft.Extensions.Azure;
+using ServerlessAPI;
 using ServerlessAPI.Repositories;
+using ServerlessAPI.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,14 +20,23 @@ builder.Services
         .AddControllers()
         .AddJsonOptions(options =>
         {
-            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         });
+
+/*
+builder.Services.Configure<AppConfiguration>(options =>
+        var client = AmazonSystem
+        
+        options.AddOpenAIClient()
+);
+*/
 
 var region = Environment.GetEnvironmentVariable("AWS_REGION") ?? RegionEndpoint.USEast1.SystemName;
 builder.Services
         .AddSingleton<IAmazonDynamoDB>(new AmazonDynamoDBClient(RegionEndpoint.GetBySystemName(region)))
         .AddScoped<IDynamoDBContext, DynamoDBContext>()
-        .AddScoped<ICourseRepository, CourseRepository>();
+        .AddScoped<ICourseRepository, CourseRepository>()
+        .AddScoped<IOpenAIService, OpenAIService>();
 
 // Add AWS Lambda support. When running the application as an AWS Serverless application, Kestrel is replaced
 // with a Lambda function contained in the Amazon.Lambda.AspNetCoreServer package, which marshals the request into the ASP.NET Core hosting framework.
