@@ -8,6 +8,7 @@ import {
     Typography,
 } from '@mui/joy'
 import React, {useEffect} from 'react'
+import {API_ENDPOINT} from "../../App.tsx";
 
 interface Props {
     coursesToRate: Course[]
@@ -44,20 +45,6 @@ const getRandomLoadingMessage = () =>
 
 const convertCourseListToStringList = (courses : Course[]) => (courses.map(course => course.Name));
 
-// const rateCourses = (courseStrings: string[]) => (async () => {
-//     const rawResponse = await fetch('http://localhost:5000/api/course/rate', {
-//         method: 'POST',
-//         headers: {
-//             'Accept': 'application/json',
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify({ courses: courseStrings })
-//     });
-//     const content = await rawResponse.json();
-//
-//     console.log(content);
-// })();
-
 interface CourseRatingResponse {
     "credit hours": string;
     "workload": string;
@@ -73,7 +60,7 @@ export default function SuggestionPage({ coursesToRate }: Props) {
         const fetchRating = async () => {
             try {
                 const courseStrings = convertCourseListToStringList(coursesToRate);
-                const rawResponse = await fetch('http://localhost:5000/api/course/rate', {
+                const rawResponse = await fetch(`${API_ENDPOINT}/course/rate`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',

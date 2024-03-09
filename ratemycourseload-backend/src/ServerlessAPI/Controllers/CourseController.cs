@@ -13,7 +13,7 @@ using ServerlessAPI.Services;
 
 namespace ServerlessAPI.Controllers;
 
-[Route("api/[controller]")]
+[Route("[controller]")]
 [Produces("application/json")]
 public class CourseController : ControllerBase
 {

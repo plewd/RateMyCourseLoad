@@ -9,6 +9,7 @@ import {
 import ClassIcon from '@mui/icons-material/Class'
 import PublishIcon from '@mui/icons-material/Publish'
 import React, { useState } from 'react'
+import {API_ENDPOINT} from "../../App.tsx";
 
 interface Props {
     coursePrefixOptions: string[]
@@ -47,8 +48,7 @@ function CourseSelectorInput({
         }
 
         const response = await fetch(
-            // TODO: get this from environment var
-            `http://localhost:5000/api/course/prefix/${coursePrefix}`
+            `${API_ENDPOINT}/course/prefix/${coursePrefix}`
         )
         if (!response.ok) {
             throw new Error('Network response was not ok')
