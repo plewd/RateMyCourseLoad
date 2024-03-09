@@ -21,7 +21,7 @@ public class OpenAIService : IOpenAIService
         _client = new OpenAIClient(settings.Value.OpenAIAPIKey);
     }
 
-    private async Task<string> GetDescriptiveTextForSelectedCourses(string[] courseNames)
+    public async Task<(string, int)> GetDescriptiveTextForSelectedCourses(string[] courseNames)
     {
         var sb = new StringBuilder();
         var pattern = "([A-Za-z]+)([0-9]+)";
@@ -50,28 +50,25 @@ public class OpenAIService : IOpenAIService
             totalCreditHours += course.CreditHours;
             // format course information and add to string
             sb.Append($"Course Code: {course.GetCourseName()}\nTitle: {course.Title}\n" +
-                      $"Description: {course.Description}\nCredit Hours: {course.CreditHours}\n\n");
+                      $"Description: {course.Description}\n\n");
         }
         
-        sb.Append($"Total Credit Hours: {totalCreditHours}");
-        return sb.ToString();
+        return (sb.ToString(), totalCreditHours);
     }
 
-    public async Task<Response<ChatCompletions>> RateCourses(string[] courseNames)
+    public async Task<Response<ChatCompletions>> RateCourses(string courseDescriptions)
     {
-        var courseDescriptions = await GetDescriptiveTextForSelectedCourses(courseNames);
         var options = new ChatCompletionsOptions("gpt-3.5-turbo",
             new ChatRequestMessage[]
             {
                 new ChatRequestSystemMessage("You are a course advisor for a university. " +
-                                             "When given a list of courses, along with information about those courses, that the student is planning on taking, " +
-                                             "you should analyze the schedule and give advice directly to the student, by referring to them in second person." +
+                                             "When given a list of courses that the student is planning on taking, " +
+                                             "you should analyze the courses and schedule, and give advice directly to the student by referring to them in second person." +
                                              "Return the output as a valid JSON array following this format:\n" +
-                                             "[{\"credit hours\": \"(string) Provide analysis and advice about whether the student has an appropriate credit hour load. Generally, a good credit hour load is between 16-19 hours, but DO NOT mention the specific numbers in this range in your response\",\n" +
-                                             "\"workload\": \"(string) Provide analysis and advice about whether the classes are too easy or difficult, which you can assume based on their descriptions\",\n" +
-                                             "\"balance\": \"(string) Provide analysis and advice about whether the student has a good balance of technical classes and liberal arts classes\",\n" +
-                                             "\"score\": \"(integer) Based on the other metrics, provide a score from 1-5 to rate the student's schedule}]"),
-                new ChatRequestUserMessage("Here are the courses I am planning on taking, can you give me some advice:\n" + courseDescriptions)
+                                             "[{\"workload\": (string) \"analysis and advice about whether the classes are too easy or difficult. Consider factors such as overall complexity of the concepts learnt.\",\n" +
+                                             "\"balance\": (string) \"analysis and advice about whether the student has a good balance of technical classes and liberal arts classes. Consider the mix of courses and their nature.\",\n" +
+                                             "\"score\": (integer) \"a score from 1-5 to rate the student's schedule. Consider overall workload and balance of the classes.}]"),
+                new ChatRequestUserMessage("Here are the courses I am planning on taking, what do you think:\n" + courseDescriptions)
                 {
                     Name="student"
                 },
