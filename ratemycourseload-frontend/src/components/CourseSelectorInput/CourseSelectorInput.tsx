@@ -10,6 +10,7 @@ import {
 import ClassIcon from '@mui/icons-material/Class'
 import PublishIcon from '@mui/icons-material/Publish'
 import React, { useState } from 'react'
+import useWindowDimensions from '../../hooks/useWindowDimensions.ts'
 
 interface Props {
     coursePrefixOptions: string[]
@@ -87,10 +88,12 @@ function CourseSelectorInput({
     }
 
     const isCourseReadyToAdd = coursePrefix !== null && course !== null
+    const { height, width } = useWindowDimensions()
+    const showIcon = coursePrefix === null || width > 500
 
     return (
-        <Grid container>
-            <Grid xs={6}>
+        <Grid container spacing={1}>
+            <Grid xs={5}>
                 <Autocomplete
                     variant="soft"
                     autoSelect
@@ -101,12 +104,12 @@ function CourseSelectorInput({
                     value={coursePrefix}
                     placeholder="Prefix"
                     disabled={disabled}
-                    startDecorator={<ClassIcon />}
+                    startDecorator={showIcon ? <ClassIcon /> : <></>}
                     options={coursePrefixOptions.sort()}
                 />
             </Grid>
 
-            <Grid xs={5} style={{ paddingLeft: '5px' }}>
+            <Grid xs={5}>
                 <Autocomplete
                     variant="soft"
                     autoSelect
@@ -135,7 +138,7 @@ function CourseSelectorInput({
                     }
                 />
             </Grid>
-            <Grid xs={1} style={{ paddingLeft: '5px' }}>
+            <Grid xs={2}>
                 <Button
                     disabled={!isCourseReadyToAdd}
                     onClick={() => {
