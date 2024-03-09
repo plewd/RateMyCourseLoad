@@ -60,15 +60,15 @@ public class CourseController : ControllerBase
     }
     
     [HttpPost(template:"rate")]
-    public async Task<ActionResult<IEnumerable<Course>>> Post([FromBody] CourseRatingQuery query)
+    public async Task<ActionResult<CourseLoadRating>> Post([FromBody] CourseRatingQuery query)
     {
         try
         {
             var response = await _oAIService.RateCourses(query.Courses.ToArray());
-            var json = JsonSerializer.Deserialize<dynamic>(response.Value.Choices[0].Message.Content);
+            var courseLoadRating = JsonSerializer.Deserialize<CourseLoadRating>(response.Value.Choices[0].Message.Content);
             // var responseContent = JsonContent.Create(json);
             return Ok(
-                json
+                courseLoadRating
             );
         }
         catch (Exception e)
