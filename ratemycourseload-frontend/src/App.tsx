@@ -23,7 +23,10 @@ function App() {
                 onSubmit={onCoursesSelected}
             />
             {coursesToRate !== null && (
-                <SuggestionPage coursesToRate={coursesToRate} />
+                <SuggestionPage
+                    coursesToRate={coursesToRate}
+                    onClose={() => setCoursesToRate(null)}
+                />
             )}
         </>
     )

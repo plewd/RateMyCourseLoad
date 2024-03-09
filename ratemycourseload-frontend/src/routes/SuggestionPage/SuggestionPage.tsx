@@ -8,10 +8,12 @@ import {
     ModalDialog,
     Typography,
 } from '@mui/joy'
+import { Rating } from '@mui/material'
 import React, { useEffect } from 'react'
 
 interface Props {
     coursesToRate: Course[]
+    onClose: () => void
 }
 
 const loadingMessages = [
@@ -34,7 +36,7 @@ const loadingMessages = [
     '🍳 Cooking up a feast of knowledge for your semester...',
     '🔎 Magnifying your academic potential...',
     '🦉 Summoning the wisdom of the academic owls...',
-    '🏄‍♀️ Surfing the wave of knowledge to find your perfect courses...',
+    '🏄‍ Surfing the wave of knowledge to find your perfect courses...',
 ]
 
 // Returns a number between 0..(max-1) (not inclusive of max)
@@ -53,7 +55,7 @@ interface CourseRatingResponse {
     score: string
 }
 
-export default function SuggestionPage({ coursesToRate }: Props) {
+export default function SuggestionPage({ coursesToRate, onClose }: Props) {
     const [open, setOpen] = React.useState<boolean>(true)
     const [isLoading, setIsLoading] = React.useState<boolean>(true)
     const [response, setResponse] = React.useState<CourseRatingResponse | null>(
@@ -83,11 +85,57 @@ export default function SuggestionPage({ coursesToRate }: Props) {
 
     useEffect(() => {
         void fetchRating()
-        console.log('RUNNING')
     }, [coursesToRate])
 
+    const scoreNum = Number(response?.['score'])
+    const courseLoadSuggestions = (
+        <Typography>
+            <div>
+                <strong>Credit Hours:</strong> {response?.['credit hours']}
+            </div>
+            <div>
+                <strong>Workload:</strong> {response?.['workload']}
+            </div>
+            <div>
+                <strong>Balance:</strong> {response?.['balance']}
+            </div>
+
+            <div>
+                <strong>Score:</strong>{' '}
+                <Rating
+                    name="read-only"
+                    value={scoreNum}
+                    readOnly
+                    style={{ verticalAlign: 'bottom' }}
+                />
+            </div>
+        </Typography>
+    )
+
+    const loadingScreen = (
+        <>
+            <CircularProgress
+                style={{
+                    marginLeft: '20vw',
+                    marginRight: '20vw',
+                    marginTop: '20vh',
+                    marginBottom: '10px',
+                }}
+            />
+            <Typography style={{ marginBottom: '20vh' }}>
+                {getRandomLoadingMessage()}
+            </Typography>
+        </>
+    )
+
     return (
-        <Modal open={open} onClose={() => setOpen(false)}>
+        <Modal
+            open={open}
+            onClose={() => {
+                setOpen(false)
+                onClose()
+            }}
+        >
             <ModalDialog color="neutral" variant="soft">
                 <ModalClose />
                 <Grid
@@ -95,31 +143,9 @@ export default function SuggestionPage({ coursesToRate }: Props) {
                     direction="row"
                     justifyContent="center"
                     alignItems="center"
+                    style={{ marginTop: '20px' }}
                 >
-                    {isLoading ? (
-                        <>
-                            <CircularProgress
-                                style={{
-                                    marginLeft: '20vw',
-                                    marginRight: '20vw',
-                                    marginTop: '20vh',
-                                    marginBottom: '20vh',
-                                }}
-                            />
-                            <Typography>{getRandomLoadingMessage()}</Typography>
-                        </>
-                    ) : (
-                        <Typography>
-                            <strong>Credit Hours:</strong>{' '}
-                            {response?.['credit hours']}
-                            <br />
-                            <strong>Workload:</strong> {response?.['workload']}
-                            <br />
-                            <strong>Balance:</strong> {response?.['balance']}
-                            <br />
-                            <strong>Score:</strong> {response?.['score'].toString()}
-                        </Typography>
-                    )}
+                    {isLoading ? loadingScreen : courseLoadSuggestions}
                 </Grid>
             </ModalDialog>
         </Modal>
