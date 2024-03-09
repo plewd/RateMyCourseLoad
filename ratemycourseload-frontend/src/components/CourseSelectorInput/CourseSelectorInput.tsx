@@ -24,6 +24,8 @@ type CourseSuggestion = {
     creditHours: number
 }
 
+const courseSuggestionCache: Record<string, CourseSuggestion[]> = {}
+
 function CourseSelectorInput({
     coursePrefixOptions,
     onSelected,
@@ -37,17 +39,32 @@ function CourseSelectorInput({
         CourseSuggestion[] | null
     >(null)
 
-    const fetchCourseSuggestions = async (coursePrefix: string) => {
+    const fetchCourseSuggestions = async (
+        coursePrefix: string
+    ): Promise<CourseSuggestion[]> => {
+        if (coursePrefix in courseSuggestionCache) {
+            return courseSuggestionCache[coursePrefix]
+        }
+
+        const response = await fetch(
+            // TODO: get this from environment var
+            `http://localhost:5000/api/course/prefix/${coursePrefix}`
+        )
+        if (!response.ok) {
+            throw new Error('Network response was not ok')
+        }
+
+        const courseSuggestions = await response.json()
+        courseSuggestionCache[coursePrefix] = courseSuggestions
+        return courseSuggestions
+    }
+
+    const updateCourseList = async (coursePrefix: string) => {
         try {
             setLoading(true)
-            const response = await fetch(
-                `http://localhost:5000/api/course/prefix/${coursePrefix}`
-            )
-            if (!response.ok) {
-                throw new Error('Network response was not ok')
-            }
-            const data: CourseSuggestion[] = await response.json()
-            setCourseSuggestions(data)
+            const suggestions: CourseSuggestion[] =
+                await fetchCourseSuggestions(coursePrefix)
+            setCourseSuggestions(suggestions)
             setLoading(false)
         } catch (error) {
             console.error('Error:', error)
@@ -55,9 +72,6 @@ function CourseSelectorInput({
         }
     }
 
-    /*
-    event: React.SyntheticEvent,     value: Value | Value[]
-     */
     const coursePrefixSet = (
         _event: React.SyntheticEvent,
         value: string | null
@@ -65,7 +79,7 @@ function CourseSelectorInput({
         if (value !== null) {
             setCoursePrefix(value)
             setCourse(null)
-            void fetchCourseSuggestions(value)
+            void updateCourseList(value)
         } else {
             setCoursePrefix(null)
             setCourse(null)
@@ -131,9 +145,9 @@ function CourseSelectorInput({
                                 CreditHours: course.creditHours,
                                 Title: course.title,
                             })
-                            setCoursePrefix(null)
+                            // setCoursePrefix(null)
+                            // setCourseSuggestions(null)
                             setCourse(null)
-                            setCourseSuggestions(null)
                         }
                     }}
                 >
