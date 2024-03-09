@@ -11,6 +11,7 @@ Globals:
     # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
     LoggingConfig:
       LogFormat: JSON
+
 Resources:
   NetCodeWebAPIServerless:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -27,6 +28,8 @@ Resources:
         # Give Create/Read/Update/Delete Permissions to the SampleTable
       - DynamoDBCrudPolicy:
           TableName: !Ref CourseTable
+      - SSMParameterWithSlashPrefixReadPolicy:
+          ParameterName: "/ratemycourseload/*"
       Events:
         ProxyResource:
           Type: HttpApi
@@ -41,9 +44,25 @@ Resources:
             Path: /
             Method: ANY
 
+#  ApiGatewayApi:
+#    Type: AWS::Serverless::Api
+#    Properties:
+#      StageName: prod
+#      CacheClusterEnabled: true
+#      CacheClusterSize: '0.5'
+#      MethodSettings:
+#        - ResourcePath: /
+#          HttpMethod: GET
+#          CachingEnabled: true
+#          CacheTtlInSeconds: 300
+#      Tags:
+#        CacheMethods: All
+
   # DynamoDB table to store item: {id: &lt;ID&gt;, name: &lt;NAME&gt;}
   CourseTable:
     Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       TableName: ratemycourseloadCourseCatalog
       AttributeDefinitions:
@@ -58,7 +77,71 @@ Resources:
           KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
 
+  WebsiteS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: "ratemycourseload.com"
+      PublicAccessBlockConfiguration:
+        BlockPublicPolicy: false
+      WebsiteConfiguration:
+        IndexDocument: "index.html"
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+
+  WebsiteS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteS3Bucket
+      PolicyDocument:
+        Id: PublicReadPolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource: !Sub "arn:aws:s3:::${WebsiteS3Bucket}/*"
+
+  RootCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: "ratemycourseload.com"
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: "ratemycourseload.com"
+          HostedZoneId: Z03944661W4VEU5BAKW7X
+
+  SubdomainCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: "*.ratemycourseload.com"
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: "*.ratemycourseload.com"
+          HostedZoneId: Z03944661W4VEU5BAKW7X
+
+  ApiGatewayDomainName:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: "api.ratemycourseload.com"
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      RegionalCertificateArn: !Ref SubdomainCertificate
+
+#  ApiGatewayBasePathMapping:
+#    Type: AWS::ApiGateway::BasePathMapping
+#    DependsOn: ApiGatewayDomainName
+#    Properties:
+#      DomainName: !Ref ApiGatewayDomainName
+#      RestApiId: !Ref NetCodeWebAPIServerless
+#      Stage: "$default"
+
 Outputs:
-  WebEndpoint:
-    Description: API Gateway endpoint URL
+  ApiGatewayWebEndpoint:
+    Description: API Gateway endpoint URL (direct)
     Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
+
+  CNAMEWebEndpoint:
+    Description: API Gateway endpoint URL (CNAME)
+    Value: "api.ratemycourseload.com"
