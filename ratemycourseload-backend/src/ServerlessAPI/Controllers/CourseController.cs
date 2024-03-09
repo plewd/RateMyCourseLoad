@@ -1,14 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using ServerlessAPI.Entities;
 using ServerlessAPI.Queries;
 using ServerlessAPI.Repositories;
-using System;
-using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
-using Azure;
-using Azure.AI.OpenAI;
 using ServerlessAPI.Services;
 
 namespace ServerlessAPI.Controllers;
@@ -20,6 +14,8 @@ public class CourseController : ControllerBase
     private ILogger<CourseController> _logger;
     private ICourseRepository _repo;
     private IOpenAIService _oAIService;
+    private static int minCreditHours = 16;
+    private static int maxCreditHours = 19;
     
     // ReSharper disable once ConvertToPrimaryConstructor
     // doing this will break the IOptions functionality
@@ -65,9 +61,25 @@ public class CourseController : ControllerBase
         try
         {
             _logger.LogInformation("contacting OpenAI API to rate courses...");
-            var response = await _oAIService.RateCourses(query.Courses.ToArray());
+            var scheduleInfo = await _oAIService.GetDescriptiveTextForSelectedCourses(query.Courses.ToArray());
+            var courseDescriptions = scheduleInfo.Item1;
+            var totalCreditHours = scheduleInfo.Item2;
+            var response = await _oAIService.RateCourses(courseDescriptions);
             var courseLoadRating = JsonSerializer.Deserialize<CourseLoadRating>(response.Value.Choices[0].Message.Content);
-            // var responseContent = JsonContent.Create(json);
+            
+            if (totalCreditHours < minCreditHours)
+            {
+                courseLoadRating.CreditHours = $"You currently only have {totalCreditHours} credit hours in your schedule, consider adding more classes to your schedule.";
+            }
+            else if (totalCreditHours > maxCreditHours)
+            {
+                courseLoadRating.CreditHours = $"You currently have {totalCreditHours} credit hours in your schedule, consider reducing the amount of classes you are taking.";
+            }
+            else
+            {
+                courseLoadRating.CreditHours = $"You currently have {totalCreditHours}, which is an appropriate amount for a semester.";
+            }
+            
             return Ok(
                 courseLoadRating
             );
