@@ -64,6 +64,7 @@ public class CourseController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("contacting OpenAI API to rate courses...");
             var response = await _oAIService.RateCourses(query.Courses.ToArray());
             var courseLoadRating = JsonSerializer.Deserialize<CourseLoadRating>(response.Value.Choices[0].Message.Content);
             // var responseContent = JsonContent.Create(json);
