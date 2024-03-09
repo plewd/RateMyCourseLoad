@@ -47,7 +47,11 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: prod
-      Cors: "'ratemycourseload.com'"
+      Cors:
+#        AllowCredentials: Boolean
+        AllowHeaders: "'*'"
+        AllowMethods: "'*'"
+        AllowOrigin: "'*'"
       # required to prevent this resource from creating a second
       # stage named "Stage": https://github.com/aws/serverless-application-model/issues/3477
       OpenApiVersion: "2.0"
