@@ -61,9 +61,7 @@ public class CourseController : ControllerBase
         try
         {
             _logger.LogInformation("contacting OpenAI API to rate courses...");
-            var scheduleInfo = await _oAIService.GetDescriptiveTextForSelectedCourses(query.Courses.ToArray());
-            var courseDescriptions = scheduleInfo.Item1;
-            var totalCreditHours = scheduleInfo.Item2;
+            var (courseDescriptions, totalCreditHours) = await _oAIService.GetDescriptiveTextForSelectedCourses(query.Courses.ToArray());
             var response = await _oAIService.RateCourses(courseDescriptions);
             var courseLoadRating = JsonSerializer.Deserialize<CourseLoadRating>(response.Value.Choices[0].Message.Content);
             
