@@ -7,7 +7,6 @@ Description: >
 Globals:
   Function:
     Timeout: 100
-
     # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
     LoggingConfig:
       LogFormat: JSON
@@ -32,33 +31,32 @@ Resources:
           ParameterName: "/ratemycourseload/*"
       Events:
         ProxyResource:
-          Type: HttpApi
+          Type: Api
           Properties:
-            PayloadFormatVersion: '2.0'
             Path: /{proxy+}
             Method: ANY
+            RestApiId: !Ref ServiceApiGateway
         RootResource:
-          PayloadFormatVersion: '2.0'
-          Type: HttpApi
+          Type: Api
           Properties:
             Path: /
             Method: ANY
+            RestApiId: !Ref ServiceApiGateway
 
-#  ApiGatewayApi:
-#    Type: AWS::Serverless::Api
-#    Properties:
-#      StageName: prod
-#      CacheClusterEnabled: true
-#      CacheClusterSize: '0.5'
-#      MethodSettings:
-#        - ResourcePath: /
-#          HttpMethod: GET
-#          CachingEnabled: true
-#          CacheTtlInSeconds: 300
-#      Tags:
-#        CacheMethods: All
+  ServiceApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors: "'ratemycourseload.com'"
+      # required to prevent this resource from creating a second
+      # stage named "Stage": https://github.com/aws/serverless-application-model/issues/3477
+      OpenApiVersion: "2.0"
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          ThrottlingRateLimit: 50
+          ThrottlingBurstLimit: 300
 
-  # DynamoDB table to store item: {id: &lt;ID&gt;, name: &lt;NAME&gt;}
   CourseTable:
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Retain
@@ -76,31 +74,6 @@ Resources:
         - AttributeName: Number
           KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
-
-  WebsiteS3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: "ratemycourseload.com"
-      PublicAccessBlockConfiguration:
-        BlockPublicPolicy: false
-      WebsiteConfiguration:
-        IndexDocument: "index.html"
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-
-  WebsiteS3BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref WebsiteS3Bucket
-      PolicyDocument:
-        Id: PublicReadPolicy
-        Version: 2012-10-17
-        Statement:
-          - Sid: PublicReadForGetBucketObjects
-            Effect: Allow
-            Principal: "*"
-            Action: "s3:GetObject"
-            Resource: !Sub "arn:aws:s3:::${WebsiteS3Bucket}/*"
 
   RootCertificate:
     Type: AWS::CertificateManager::Certificate
@@ -129,19 +102,104 @@ Resources:
           - REGIONAL
       RegionalCertificateArn: !Ref SubdomainCertificate
 
-#  ApiGatewayBasePathMapping:
-#    Type: AWS::ApiGateway::BasePathMapping
-#    DependsOn: ApiGatewayDomainName
+  ApiGatewayBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    DependsOn: ApiGatewayDomainName
+    Properties:
+      DomainName: !Ref ApiGatewayDomainName
+      RestApiId: !Ref ServiceApiGateway
+      Stage: prod
+
+  DNSRecordForApi:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: Z03944661W4VEU5BAKW7X
+      Name: "api.ratemycourseload.com"
+      Type: A
+      AliasTarget:
+        HostedZoneId: !GetAtt ApiGatewayDomainName.RegionalHostedZoneId
+        DNSName: !GetAtt ApiGatewayDomainName.RegionalDomainName
+
+
+  # --- WEBSITE ---
+  WebsiteS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: "ratemycourseload.com"
+      PublicAccessBlockConfiguration:
+        BlockPublicPolicy: false
+      WebsiteConfiguration:
+        IndexDocument: "index.html"
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+
+  WebsiteS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteS3Bucket
+      PolicyDocument:
+        Id: PublicReadPolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource: !Sub "arn:aws:s3:::${WebsiteS3Bucket}/*"
+
+  WebsiteRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: Z03944661W4VEU5BAKW7X
+      Name: "ratemycourseload.com"
+      Type: A
+      AliasTarget:
+        HostedZoneId: Z3AQBSTGFYJSTF # This is the hosted zone ID for S3 website endpoints in all regions
+        DNSName: "s3-website-us-east-1.amazonaws.com."
+
+#  WebsiteCloudFront:
+#    Type: AWS::CloudFront::Distribution
 #    Properties:
-#      DomainName: !Ref ApiGatewayDomainName
-#      RestApiId: !Ref NetCodeWebAPIServerless
-#      Stage: "$default"
+#      DistributionConfig:
+#        Origins:
+#          - DomainName: !GetAtt WebsiteS3Bucket.DomainName
+#            Id: S3Origin
+#            S3OriginConfig: {}
+#        Enabled: true
+#        DefaultRootObject: index.html
+#        ViewerCertificate:
+#          AcmCertificateArn: !Ref RootCertificate
+#          SslSupportMethod: sni-only
+#        DefaultCacheBehavior:
+#          TargetOriginId: S3Origin
+#          ViewerProtocolPolicy: redirect-to-https
+#          AllowedMethods:
+#            - GET
+#            - HEAD
+#          CachedMethods:
+#            - GET
+#            - HEAD
+#          Compress: true
+#          ForwardedValues:
+#            QueryString: false
+#            Cookies:
+#              Forward: none
+#
+#  WebsiteRecordSet:
+#    Type: AWS::Route53::RecordSet
+#    Properties:
+#      HostedZoneId: Z03944661W4VEU5BAKW7X
+#      Name: "ratemycourseload.com"
+#      Type: A
+#      AliasTarget:
+#        HostedZoneId: Z2FDTNDATAQYW2 # This is the hosted zone ID for CloudFront
+#        DNSName: !GetAtt WebsiteCloudFront.DomainName
 
-Outputs:
-  ApiGatewayWebEndpoint:
-    Description: API Gateway endpoint URL (direct)
-    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
-
-  CNAMEWebEndpoint:
-    Description: API Gateway endpoint URL (CNAME)
-    Value: "api.ratemycourseload.com"
+#Outputs:
+#  ApiGatewayWebEndpoint:
+#    Description: API Gateway endpoint URL (direct)
+#    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
+#
+#  CNAMEWebEndpoint:
+#    Description: API Gateway endpoint URL (CNAME)
+#    Value: "api.ratemycourseload.com"
