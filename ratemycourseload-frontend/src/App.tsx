@@ -1,26 +1,30 @@
 import './App.css'
 import SelectionPage from '@routes/SelectionPage/SelectionPage.tsx'
-// import { Course } from '@types'
 import coursePrefixList from '@assets/course_prefixes.json'
-
-// const getAllCourseOptions = (): Course[] => {
-//     return courseList
-//         .filter((item) => 'exact' in item['credit_hour'])
-//         .map((item) => ({
-//             Name: item.name,
-//             Title: item.title,
-//             CreditHours: item['credit_hour'].exact!,
-//         }))
-// }
+import SuggestionPage from '@routes/SuggestionPage/SuggestionPage.tsx'
+import React from 'react'
+import { Course } from '@types'
 
 function App() {
     // fetch all valid courses
     const coursePrefixOptions: string[] = coursePrefixList.coursePrefixes
+    const [coursesToRate, setCoursesToRate] = React.useState<Course[] | null>(
+        null
+    )
+    const onCoursesSelected = (cs: Course[]) => {
+        setCoursesToRate(cs)
+    }
 
     return (
         <>
             <h1>RateMyCourseLoad</h1>
-            <SelectionPage coursePrefixOptions={coursePrefixOptions} />
+            <SelectionPage
+                coursePrefixOptions={coursePrefixOptions}
+                onSubmit={onCoursesSelected}
+            />
+            {coursesToRate !== null && (
+                <SuggestionPage coursesToRate={coursesToRate} />
+            )}
         </>
     )
 }
