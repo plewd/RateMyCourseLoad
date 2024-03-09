@@ -5,6 +5,6 @@ namespace ServerlessAPI.Services;
 
 public interface IOpenAIService
 {
-    public Task<Response<ChatCompletions>> RateCourses();
+    public Task<Response<ChatCompletions>> RateCourses(string[] courseNames);
     
 }

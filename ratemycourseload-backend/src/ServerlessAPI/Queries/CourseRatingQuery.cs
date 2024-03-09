@@ -1,8 +1,10 @@
+using System.Text.Json.Serialization;
 
 namespace ServerlessAPI.Queries;
 
 public class CourseRatingQuery
 {
-    public List<string> Courses;
+    [JsonPropertyName("courses")]
+    public List<string> Courses { get; set; }
     
 }

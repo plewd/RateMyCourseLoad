@@ -73,11 +73,12 @@ public class CourseRepository(IDynamoDBContext context, ILogger<CourseRepository
     {
         try
         {
-            return await context.LoadAsync<Course>(coursePrefix, courseNumber);
+            return await context.LoadAsync<Course>(coursePrefix, courseNumber.ToString());
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "fail to fetch Course from DynamoDb Table");
+            logger.LogError(ex, "fail to fetch Course id {CourseID} from DynamoDb Table",
+                coursePrefix + courseNumber);
             return null;
         }
     }

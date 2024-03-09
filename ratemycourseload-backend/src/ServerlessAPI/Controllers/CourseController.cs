@@ -5,6 +5,7 @@ using ServerlessAPI.Queries;
 using ServerlessAPI.Repositories;
 using System;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Azure;
 using Azure.AI.OpenAI;
@@ -14,19 +15,19 @@ namespace ServerlessAPI.Controllers;
 
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class CourseController(ILogger<CourseController> logger, ICourseRepository repo, IOpenAIService oAIService) : ControllerBase
+public class CourseController : ControllerBase
 {
     private ILogger<CourseController> _logger;
     private ICourseRepository _repo;
-    private IOptions<Settings> _settings;
+    private IOpenAIService _oAIService;
     
     // ReSharper disable once ConvertToPrimaryConstructor
     // doing this will break the IOptions functionality
-    public CourseController(ILogger<CourseController> logger, ICourseRepository repo, IOptions<Settings> settings)
+    public CourseController(ILogger<CourseController> logger, ICourseRepository repo, IOpenAIService oAIService)
     {
         _logger = logger;
         _repo = repo;
-        _settings = settings;
+        _oAIService = oAIService;
     }
     
     [HttpGet(template:"prefix/{coursePrefix}")]
@@ -59,34 +60,20 @@ public class CourseController(ILogger<CourseController> logger, ICourseRepositor
     }
     
     [HttpPost(template:"rate")]
-    public async Task<ActionResult<IEnumerable<Course>>> Get([FromBody] CourseRatingQuery query)
+    public async Task<ActionResult<IEnumerable<Course>>> Post([FromBody] CourseRatingQuery query)
     {
-        var sb = new StringBuilder();
-        var pattern = "([A-Za-z]+)([0-9]+)";
-        
-        foreach (var courseString in query.Courses)
+        try
         {
-            // parse course string to match prefix and number
-            Match match = Regex.Match(courseString, pattern);
-            
-            // search for course info from DynamoDB
-            var course = await repo.GetByIdAsync(match.Groups[1].Value, int.Parse(match.Groups[2].Value));
-
-            if (course == null)
-            { 
-                return NotFound();
-            }
-            
-            sb.Append($"Course Code: {course.GetCourseName()}\nTitle: {course.Title}\n" +
-                      $"Description: {course.Description}\nCredit Hours: {course.CreditHours}\n\n");
+            var response = await _oAIService.RateCourses(query.Courses.ToArray());
+            var json = JsonSerializer.Deserialize<dynamic>(response.Value.Choices[0].Message.Content);
+            // var responseContent = JsonContent.Create(json);
+            return Ok(
+                json
+            );
         }
-        
-        var oAIService = new OpenAIService("apiKey", sb.ToString());
-        // should probably check that this worked properly, before just passing it to Ok output
-        Response<ChatCompletions> response = await oAIService.RateCourses();
-        
-        return Ok(
-            response.Value
-        );
+        catch (Exception e)
+        {
+            return NotFound();
+        }
     }
 }
