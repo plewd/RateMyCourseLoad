@@ -3,13 +3,6 @@
 
 RateMyCourseLoad is a web application designed to assist students in planning their academic schedules effectively.
 
-## Table of Contents
-
-- [Project Overview](#project-overview)
-- [Getting Started](#getting-started)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
-
 ## Project Overview
 
 RateMyCourseLoad aims to simplify the course planning process for students by leveraging AI technology.
