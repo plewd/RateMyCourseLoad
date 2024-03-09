@@ -3,8 +3,6 @@ using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using ServerlessAPI;
-using Microsoft.Extensions.Azure;
-using ServerlessAPI;
 using ServerlessAPI.Repositories;
 using ServerlessAPI.Services;
 

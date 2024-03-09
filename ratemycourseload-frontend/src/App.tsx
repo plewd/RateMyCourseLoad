@@ -5,10 +5,7 @@ import SuggestionPage from '@routes/SuggestionPage/SuggestionPage.tsx'
 import React from 'react'
 import { Course } from '@types'
 
-//export const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT
-
 function App() {
-
     // fetch all valid courses
     const coursePrefixOptions: string[] = coursePrefixList.coursePrefixes
     const [coursesToRate, setCoursesToRate] = React.useState<Course[] | null>(

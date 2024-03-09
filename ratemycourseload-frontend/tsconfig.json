@@ -32,6 +32,9 @@
       "@types": [
         "./types.ts"
       ],
+      "@configuration": [
+        "./configuration.ts"
+      ],
       "@assets/*": [
         "../assets/*"
       ]

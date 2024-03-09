@@ -1,4 +1,5 @@
 import { Course } from '@types'
+import { API_ENDPOINT } from '@configuration'
 import {
     CircularProgress,
     Grid,
@@ -7,8 +8,7 @@ import {
     ModalDialog,
     Typography,
 } from '@mui/joy'
-import React, {useEffect} from 'react'
-//import {API_ENDPOINT} from "../../App.tsx";
+import React, { useEffect } from 'react'
 
 interface Props {
     coursesToRate: Course[]
@@ -43,43 +43,47 @@ const getRandomInt = (max: number) => Math.floor(Math.random() * max)
 const getRandomLoadingMessage = () =>
     loadingMessages[getRandomInt(loadingMessages.length)]
 
-const convertCourseListToStringList = (courses : Course[]) => (courses.map(course => course.Name));
+const convertCourseListToStringList = (courses: Course[]) =>
+    courses.map((course) => course.Name)
 
 interface CourseRatingResponse {
-    "credit hours": string;
-    "workload": string;
-    "balance": string;
+    'credit hours': string
+    workload: string
+    balance: string
 }
 
 export default function SuggestionPage({ coursesToRate }: Props) {
     const [open, setOpen] = React.useState<boolean>(true)
     const [isLoading, setIsLoading] = React.useState<boolean>(true)
-    const [response, setResponse] = React.useState<CourseRatingResponse | null>(null);
+    const [response, setResponse] = React.useState<CourseRatingResponse | null>(
+        null
+    )
+
+    const fetchRating = async () => {
+        try {
+            const courseStrings = convertCourseListToStringList(coursesToRate)
+            const rawResponse = await fetch(`${API_ENDPOINT}/course/rate`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ courses: courseStrings }),
+            })
+            const content = await rawResponse.json()
+            console.log(content)
+            setResponse(content)
+            setIsLoading(false)
+        } catch (error) {
+            console.error('Error fetching course rating:', error)
+            setIsLoading(false)
+        }
+    }
 
     useEffect(() => {
-        const fetchRating = async () => {
-            try {
-                const courseStrings = convertCourseListToStringList(coursesToRate);
-                const rawResponse = await fetch(`http://localhost:5000/course/rate`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ courses: courseStrings })
-                });
-                const content = await rawResponse.json();
-                console.log(content)
-                setResponse(content);
-                setIsLoading(false);
-            } catch (error) {
-                console.error('Error fetching course rating:', error);
-                setIsLoading(false);
-            }
-        };
-
-        fetchRating();
-    }, [coursesToRate]);
+        void fetchRating()
+        console.log('RUNNING')
+    }, [coursesToRate])
 
     return (
         <Modal open={open} onClose={() => setOpen(false)}>
@@ -105,9 +109,12 @@ export default function SuggestionPage({ coursesToRate }: Props) {
                         </>
                     ) : (
                         <Typography>
-                            <strong>Credit Hours:</strong> {response?.["credit hours"]}<br/>
-                            <strong>Workload:</strong> {response?.["workload"]}<br/>
-                            <strong>Balance:</strong> {response?.["balance"]}
+                            <strong>Credit Hours:</strong>{' '}
+                            {response?.['credit hours']}
+                            <br />
+                            <strong>Workload:</strong> {response?.['workload']}
+                            <br />
+                            <strong>Balance:</strong> {response?.['balance']}
                         </Typography>
                     )}
                 </Grid>
