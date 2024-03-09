@@ -14,5 +14,6 @@ public class CourseLoadRating
     public string Workload { get; set; }
     [JsonPropertyName("balance")]
     public string Balance { get; set; }
-    
+    [JsonPropertyName("score")]
+    public int Score { get; set; }
 }

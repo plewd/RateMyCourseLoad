@@ -50,6 +50,7 @@ interface CourseRatingResponse {
     'credit hours': string
     workload: string
     balance: string
+    score: string
 }
 
 export default function SuggestionPage({ coursesToRate }: Props) {
@@ -115,6 +116,8 @@ export default function SuggestionPage({ coursesToRate }: Props) {
                             <strong>Workload:</strong> {response?.['workload']}
                             <br />
                             <strong>Balance:</strong> {response?.['balance']}
+                            <br />
+                            <strong>Score:</strong> {response?.['score'].toString()}
                         </Typography>
                     )}
                 </Grid>

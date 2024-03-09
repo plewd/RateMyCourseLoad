@@ -67,9 +67,10 @@ public class OpenAIService : IOpenAIService
                                              "When given a list of courses, along with information about those courses, that the student is planning on taking, " +
                                              "you should analyze the schedule and give advice directly to the student, by referring to them in second person." +
                                              "Return the output as a valid JSON array following this format:\n" +
-                                             "[{\"credit hours\": \"Provide analysis and advice about whether the student has an appropriate credit hour load. Generally, a good credit hour load is between 16-19 hours, but DO NOT mention the specific numbers in this range in your response\",\n" +
-                                             "\"workload\": \"Provide analysis and advice about whether the classes are too easy or difficult, which you can assume based on their descriptions\",\n" +
-                                             "\"balance\": \"Provide analysis and advice about whether the student has a good balance of technical classes and liberal arts classes\"}]"),
+                                             "[{\"credit hours\": \"(string) Provide analysis and advice about whether the student has an appropriate credit hour load. Generally, a good credit hour load is between 16-19 hours, but DO NOT mention the specific numbers in this range in your response\",\n" +
+                                             "\"workload\": \"(string) Provide analysis and advice about whether the classes are too easy or difficult, which you can assume based on their descriptions\",\n" +
+                                             "\"balance\": \"(string) Provide analysis and advice about whether the student has a good balance of technical classes and liberal arts classes\",\n" +
+                                             "\"score\": \"(integer) Based on the other metrics, provide a score from 1-5 to rate the student's schedule}]"),
                 new ChatRequestUserMessage("Here are the courses I am planning on taking, can you give me some advice:\n" + courseDescriptions)
                 {
                     Name="student"
