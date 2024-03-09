@@ -8,7 +8,7 @@ import {
     Typography,
 } from '@mui/joy'
 import React, {useEffect} from 'react'
-import {API_ENDPOINT} from "../../App.tsx";
+//import {API_ENDPOINT} from "../../App.tsx";
 
 interface Props {
     coursesToRate: Course[]
@@ -60,7 +60,7 @@ export default function SuggestionPage({ coursesToRate }: Props) {
         const fetchRating = async () => {
             try {
                 const courseStrings = convertCourseListToStringList(coursesToRate);
-                const rawResponse = await fetch(`${API_ENDPOINT}/course/rate`, {
+                const rawResponse = await fetch(`http://localhost:5000/course/rate`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
