@@ -88,7 +88,7 @@ function CourseSelectorInput({
     }
 
     const isCourseReadyToAdd = coursePrefix !== null && course !== null
-    const { height, width } = useWindowDimensions()
+    const { width } = useWindowDimensions()
     const showIcon = coursePrefix === null || width > 500
 
     return (
