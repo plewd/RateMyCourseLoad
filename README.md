@@ -1,5 +1,5 @@
 # RateMyCourseLoad
-**Website:** [RateMyCourseLoad.com](https://www.ratemycourseload.com)
+**Website:** [RateMyCourseLoad.com](http://www.ratemycourseload.com)
 
 RateMyCourseLoad is a web application designed to assist students in planning their academic schedules effectively.
 
