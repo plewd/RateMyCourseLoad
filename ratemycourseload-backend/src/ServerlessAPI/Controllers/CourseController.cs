@@ -14,6 +14,7 @@ public class CourseController : ControllerBase
     private ILogger<CourseController> _logger;
     private ICourseRepository _repo;
     private IOpenAIService _oAIService;
+    private static int veryLowCreditHours = 6;
     private static int minCreditHours = 16;
     private static int maxCreditHours = 19;
     
@@ -68,10 +69,12 @@ public class CourseController : ControllerBase
             if (totalCreditHours < minCreditHours)
             {
                 courseLoadRating.CreditHours = $"You currently only have {totalCreditHours} credit hours in your schedule, consider adding more classes to your schedule.";
+                courseLoadRating.Score = totalCreditHours < veryLowCreditHours ? 1 : 2;
             }
             else if (totalCreditHours > maxCreditHours)
             {
                 courseLoadRating.CreditHours = $"You currently have {totalCreditHours} credit hours in your schedule, consider reducing the amount of classes you are taking.";
+                courseLoadRating.Score = 3;
             }
             else
             {
