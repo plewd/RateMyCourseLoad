@@ -48,7 +48,6 @@ Resources:
     Properties:
       StageName: prod
       Cors:
-#        AllowCredentials: Boolean
         AllowHeaders: "'*'"
         AllowMethods: "'*'"
         AllowOrigin: "'*'"
@@ -151,59 +150,54 @@ Resources:
             Action: "s3:GetObject"
             Resource: !Sub "arn:aws:s3:::${WebsiteS3Bucket}/*"
 
-  WebsiteRecordSet:
+  WebsiteCloudFront:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - DomainName: !GetAtt WebsiteS3Bucket.DomainName
+            Id: S3Origin
+            S3OriginConfig: {}
+        Aliases: ["ratemycourseload.com"]
+        Enabled: true
+        DefaultRootObject: index.html
+        ViewerCertificate:
+          AcmCertificateArn: !Ref RootCertificate
+          SslSupportMethod: sni-only
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachedMethods:
+            - GET
+            - HEAD
+          Compress: true
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+
+  CloudfrontRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId: Z03944661W4VEU5BAKW7X
       Name: "ratemycourseload.com"
       Type: A
       AliasTarget:
-        HostedZoneId: Z3AQBSTGFYJSTF # This is the hosted zone ID for S3 website endpoints in all regions
-        DNSName: "s3-website-us-east-1.amazonaws.com."
+        HostedZoneId: Z2FDTNDATAQYW2 # This is the hosted zone ID for CloudFront
+        DNSName: !GetAtt WebsiteCloudFront.DomainName
 
-#  WebsiteCloudFront:
-#    Type: AWS::CloudFront::Distribution
-#    Properties:
-#      DistributionConfig:
-#        Origins:
-#          - DomainName: !GetAtt WebsiteS3Bucket.DomainName
-#            Id: S3Origin
-#            S3OriginConfig: {}
-#        Enabled: true
-#        DefaultRootObject: index.html
-#        ViewerCertificate:
-#          AcmCertificateArn: !Ref RootCertificate
-#          SslSupportMethod: sni-only
-#        DefaultCacheBehavior:
-#          TargetOriginId: S3Origin
-#          ViewerProtocolPolicy: redirect-to-https
-#          AllowedMethods:
-#            - GET
-#            - HEAD
-#          CachedMethods:
-#            - GET
-#            - HEAD
-#          Compress: true
-#          ForwardedValues:
-#            QueryString: false
-#            Cookies:
-#              Forward: none
-#
-#  WebsiteRecordSet:
-#    Type: AWS::Route53::RecordSet
-#    Properties:
-#      HostedZoneId: Z03944661W4VEU5BAKW7X
-#      Name: "ratemycourseload.com"
-#      Type: A
-#      AliasTarget:
-#        HostedZoneId: Z2FDTNDATAQYW2 # This is the hosted zone ID for CloudFront
-#        DNSName: !GetAtt WebsiteCloudFront.DomainName
+Outputs:
+  ApiGatewayWebEndpoint:
+    Description: API Gateway endpoint URL (direct)
+    Value: !Sub "https://${ServiceApiGateway}.execute-api.${AWS::Region}.amazonaws.com/"
 
-#Outputs:
-#  ApiGatewayWebEndpoint:
-#    Description: API Gateway endpoint URL (direct)
-#    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
-#
-#  CNAMEWebEndpoint:
-#    Description: API Gateway endpoint URL (CNAME)
-#    Value: "api.ratemycourseload.com"
+  CNAMEWebEndpoint:
+    Description: API Gateway endpoint URL (CNAME)
+    Value: "https://api.ratemycourseload.com"
+
+  Website:
+    Description: Main website
+    Value: "https://ratemycourseload.com"
