@@ -15,7 +15,7 @@ The system analyzes a list of courses a student plans to take, providing advice 
 
 ### Feedback Popup:
 
-![Feedback Popup](https://github.com/plewd](https://github.com/plewd/RateMyCourseLoad/blob/main/screenshots/Feedback.png)
+![Feedback Popup](https://github.com/plewd/RateMyCourseLoad/blob/main/screenshots/Feedback.png)
 
 ## License
 
